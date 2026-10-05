@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkyPredict - Flight Fare Prediction & Booking</title>
+  <meta name="description"
+    content="Predict flight fares and plan your travel with SkyPredict. Real-time predictions, simple bookings, premium interface.">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap"
+    rel="stylesheet">
+  <!-- FontAwesome Icons for modern visuals -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- Background Clouds & Flight Animation -->
+  <div class="sky-container">
+    <!-- Parallax Clouds -->
+    <div class="cloud cloud-back-1"></div>
+    <div class="cloud cloud-back-2"></div>
+    <div class="cloud cloud-mid-1"></div>
+    <div class="cloud cloud-mid-2"></div>
+
+    <!-- SVG Airplane flying across -->
+    <div class="airplane-track">
+      <div class="airplane" id="intro-airplane">
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M15 50 L40 47 L65 15 L72 15 L58 45 L85 43 L90 32 L95 32 L92 48 L97 50 L92 52 L95 68 L90 68 L85 57 L58 55 L72 85 L65 85 L40 53 Z"
+            fill="rgba(255, 255, 255, 0.95)" />
+          <path d="M15 50 L40 47 L65 15 L72 15 L58 45 L85 43 L90 32" stroke="rgba(0, 242, 254, 0.6)"
+            stroke-width="1.5" />
+        </svg>
+        <div class="engine-glow"></div>
+        <div class="vapor-trail"></div>
+      </div>
+    </div>
+
+    <div class="cloud cloud-front-1"></div>
+    <div class="cloud cloud-front-2"></div>
+  </div>
+
+  <!-- Main Container -->
+  <main class="main-container">
+
+    <!-- HEADER / LOGO ZONE -->
+    <header class="app-header hide-initial" id="app-header">
+      <div class="logo">
+        <i class="fa-solid fa-plane-departure"></i>
+        <span>SkyPredict</span>
+      </div>
+    </header>
+
+    <!-- SECTION 1: LOGIN & WELCOME VIEW -->
+    <section class="auth-section" id="auth-section">
+      <div class="intro-titles" id="intro-titles">
+        <h1 class="project-title">SkyPredict</h1>
+        <p class="project-tagline">Flight Fare Prediction</p>
+      </div>
+
+      <!-- Login Glassmorphic Card -->
+      <div class="login-card glass-card fade-in-delayed" id="login-card">
+        <h2 class="card-title">Welcome Back</h2>
+        <p class="card-subtitle">Login to predict and book flights worldwide</p>
+
+        <form id="login-form" onsubmit="handleLogin(event)">
+          <div class="input-group">
+            <i class="fa-solid fa-envelope input-icon"></i>
+            <input type="email" id="login-email" required placeholder=" ">
+            <label for="login-email">Email Address</label>
+          </div>
+
+          <div class="input-group">
+            <i class="fa-solid fa-lock input-icon"></i>
+            <input type="password" id="login-password" required placeholder=" ">
+            <label for="login-password">Password</label>
+          </div>
+
+          <div class="forgot-pwd-row">
+            <button type="button" class="btn-link" onclick="openForgotPasswordModal()">Forgot Password?</button>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block">
+            <span>Login</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </form>
+
+        <div class="card-footer">
+          <span>Don't have an account?</span>
+          <button type="button" class="btn-link-highlight" onclick="openRegisterModal()">New User</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: TRAVEL DETAILS PAGE -->
+    <section class="travel-details-section hidden" id="travel-section">
+      <div class="glass-card main-booking-card">
+        <div class="booking-header">
+          <h2 class="booking-title">Where are you flying?</h2>
+          <p class="booking-subtitle">Enter travel details to predict fare trends and find your flights</p>
+        </div>
+
+        <form id="travel-form" onsubmit="handleSearch(event)">
+          <!-- Row 1: From / To with global search suggestions -->
+          <div class="form-row grid-2">
+            <div class="input-group-custom select-custom">
+              <label><i class="fa-solid fa-plane-departure"></i> From</label>
+              <div class="dropdown-wrapper">
+                <input type="text" id="airport-from" placeholder="Origin City or Airport" required autocomplete="off"
+                  onfocus="showSuggestions('from')" oninput="filterAirports('from')">
+                <input type="hidden" id="airport-from-val">
+                <div class="suggestions-list" id="suggestions-from"></div>
+              </div>
+            </div>
+
+            <div class="input-group-custom select-custom">
+              <label><i class="fa-solid fa-plane-arrival"></i> To</label>
+              <div class="dropdown-wrapper">
+                <input type="text" id="airport-to" placeholder="Destination City or Airport" required autocomplete="off"
+                  onfocus="showSuggestions('to')" oninput="filterAirports('to')">
+                <input type="hidden" id="airport-to-val">
+                <div class="suggestions-list" id="suggestions-to"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 2: Date and Flight Stops -->
+          <div class="form-row grid-2">
+            <div class="input-group-custom">
+              <label for="departure-date"><i class="fa-solid fa-calendar-days"></i> Departure Date</label>
+              <input type="date" id="departure-date" required>
+            </div>
+
+            <div class="input-group-custom">
+              <label><i class="fa-solid fa-route"></i> Flight Stops</label>
+              <div class="stops-selector">
+                <input type="radio" name="flight-stops" id="stops-any" value="any" checked>
+                <label for="stops-any" class="stop-option">Any</label>
+
+                <input type="radio" name="flight-stops" id="stops-direct" value="0">
+                <label for="stops-direct" class="stop-option">Direct</label>
+
+                <input type="radio" name="flight-stops" id="stops-one" value="1">
+                <label for="stops-one" class="stop-option">1 Stop</label>
+
+                <input type="radio" name="flight-stops" id="stops-two" value="2">
+                <label for="stops-two" class="stop-option">2+ Stops</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 3: Passenger count selection with custom drop-down UI -->
+          <div class="form-row">
+            <div class="input-group-custom select-custom">
+              <label><i class="fa-solid fa-users"></i> Passengers</label>
+              <div class="passenger-dropdown-wrapper">
+                <button type="button" class="passenger-summary-btn" id="passenger-summary-btn"
+                  onclick="togglePassengerDropdown(event)">
+                  <span id="passenger-summary-text">1 Adult</span>
+                  <i class="fa-solid fa-chevron-down"></i>
+                </button>
+                <div class="passenger-dropdown-content" id="passenger-dropdown">
+                  <!-- Adults -->
+                  <div class="passenger-row">
+                    <div class="passenger-info">
+                      <span class="p-type">Adults</span>
+                      <span class="p-desc">Age 12+ years</span>
+                    </div>
+                    <div class="counter-controls">
+                      <button type="button" class="counter-btn" onclick="adjustPassenger('adults', -1)"><i
+                          class="fa-solid fa-minus"></i></button>
+                      <span class="counter-val" id="count-adults">1</span>
+                      <button type="button" class="counter-btn" onclick="adjustPassenger('adults', 1)"><i
+                          class="fa-solid fa-plus"></i></button>
+                    </div>
+                  </div>
+
+                  <!-- Children -->
+                  <div class="passenger-row">
+                    <div class="passenger-info">
+                      <span class="p-type">Children</span>
+                      <span class="p-desc">Age 2 - 11 years</span>
+                    </div>
+                    <div class="counter-controls">
+                      <button type="button" class="counter-btn" onclick="adjustPassenger('children', -1)"><i
+                          class="fa-solid fa-minus"></i></button>
+                      <span class="counter-val" id="count-children">0</span>
+                      <button type="button" class="counter-btn" onclick="adjustPassenger('children', 1)"><i
+                          class="fa-solid fa-plus"></i></button>
+                    </div>
+                  </div>
+
+                  <!-- Infants -->
+                  <div class="passenger-row">
+                    <div class="passenger-info">
+                      <span class="p-type">Infants</span>
+                      <span class="p-desc">On lap, age 0 - 2 years</span>
+                    </div>
+                    <div class="counter-controls">
+                      <button type="button" class="counter-btn" onclick="adjustPassenger('infants', -1)"><i
+                          class="fa-solid fa-minus"></i></button>
+                      <span class="counter-val" id="count-infants">0</span>
+                      <button type="button" class="counter-btn" onclick="adjustPassenger('infants', 1)"><i
+                          class="fa-solid fa-plus"></i></button>
+                    </div>
+                  </div>
+
+                  <div class="passenger-dropdown-footer">
+                    <button type="button" class="btn btn-secondary btn-sm"
+                      onclick="closePassengerDropdown()">Done</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-submit-row">
+            <button type="submit" class="btn btn-primary btn-large">
+              <i class="fa-solid fa-chart-line"></i> Predict Fare & Search
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- SECTION 3: FARE PREDICTION RESULTS -->
+    <section class="results-section hidden" id="results-section">
+      <div class="results-header">
+        <button class="btn btn-secondary btn-sm btn-back" onclick="goBackToSearch()">
+          <i class="fa-solid fa-arrow-left"></i> Change Details
+        </button>
+        <h2 class="results-title">Prediction & Analysis</h2>
+      </div>
+
+      <div class="results-grid">
+        <!-- Main prediction summary -->
+        <div class="glass-card prediction-summary-card">
+          <div class="route-badge" id="res-route">JFK → LHR</div>
+          <div class="predicted-price-display">
+            <span class="currency">$</span>
+            <span class="price-value" id="res-price">489</span>
+            <span class="price-label">Predicted Base Fare</span>
+          </div>
+          <div class="prediction-meter-wrapper">
+            <div class="meter-bar">
+              <div class="meter-progress" id="res-meter" style="width: 45%;"></div>
+            </div>
+            <div class="meter-labels">
+              <span>Low</span>
+              <span>Fair Price</span>
+              <span>High</span>
+            </div>
+          </div>
+          <div class="prediction-status-message" id="res-advice">
+            <i class="fa-solid fa-circle-check text-green"></i> Buy Now! Prices are predicted to rise by 18% next week.
+          </div>
+        </div>
+
+        <!-- Price trend simulator graph -->
+        <div class="glass-card trend-card">
+          <h3 class="card-sub-title"><i class="fa-solid fa-chart-area"></i> 7-Day Price Trend Prediction</h3>
+          <div class="price-trend-graph">
+            <div class="graph-y-axis">
+              <span id="g-y-max">$600</span>
+              <span id="g-y-mid">$500</span>
+              <span id="g-y-min">$400</span>
+            </div>
+            <div class="graph-bars-container" id="graph-bars">
+              <!-- Dynamically generated bars representing fare trend -->
+            </div>
+          </div>
+          <div class="graph-x-axis" id="graph-x">
+            <!-- Dynamically populated dates -->
+          </div>
+        </div>
+
+        <!-- Simulated flights options -->
+        <div class="flights-list-container">
+          <h3 class="card-sub-title"><i class="fa-solid fa-plane"></i> Available Flights for <span id="res-date">June
+              25, 2026</span></h3>
+          <div class="flights-list" id="flights-list">
+            <!-- Simulated flight card items generated here -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL 1: NEW USER REGISTRATION -->
+  <div class="modal-backdrop hidden" id="register-modal">
+    <div class="glass-card modal-content animate-pop">
+      <div class="modal-header">
+        <h3 class="modal-title">Create Account</h3>
+        <button class="modal-close-btn" onclick="closeRegisterModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="register-form" onsubmit="handleRegister(event)">
+        <!-- Name layout (three-column) -->
+        <div class="grid-3">
+          <div class="input-group">
+            <i class="fa-solid fa-user input-icon"></i>
+            <input type="text" id="reg-firstname" required placeholder=" ">
+            <label for="reg-firstname">First Name</label>
+          </div>
+          <div class="input-group">
+            <i class="fa-solid fa-user input-icon"></i>
+            <input type="text" id="reg-middlename" placeholder=" ">
+            <label for="reg-middlename">Middle Name</label>
+          </div>
+          <div class="input-group">
+            <i class="fa-solid fa-user input-icon"></i>
+            <input type="text" id="reg-lastname" required placeholder=" ">
+            <label for="reg-lastname">Last Name</label>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <i class="fa-solid fa-envelope input-icon"></i>
+          <input type="email" id="reg-email" required placeholder=" ">
+          <label for="reg-email">Email Address</label>
+        </div>
+
+        <div class="input-group">
+          <i class="fa-solid fa-phone input-icon"></i>
+          <input type="tel" id="reg-phone" required placeholder=" " pattern="^[0-9+\s\-()]{7,17}$">
+          <label for="reg-phone">Phone Number</label>
+        </div>
+
+        <div class="grid-2">
+          <div class="input-group">
+            <i class="fa-solid fa-lock input-icon"></i>
+            <input type="password" id="reg-password" required placeholder=" " minlength="6">
+            <label for="reg-password">Password</label>
+          </div>
+          <div class="input-group">
+            <i class="fa-solid fa-lock input-icon"></i>
+            <input type="password" id="reg-confirm-password" required placeholder=" ">
+            <label for="reg-confirm-password">Confirm Password</label>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeRegisterModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Account</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: FORGOT PASSWORD -->
+  <div class="modal-backdrop hidden" id="forgot-modal">
+    <div class="glass-card modal-content animate-pop">
+      <div class="modal-header">
+        <h3 class="modal-title">Reset Password</h3>
+        <button class="modal-close-btn" onclick="closeForgotPasswordModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="forgot-form" onsubmit="handleForgotPassword(event)">
+        <p class="modal-desc">Enter your registered email address and we'll send you instructions to reset your
+          password.</p>
+
+        <div class="input-group">
+          <i class="fa-solid fa-envelope input-icon"></i>
+          <input type="email" id="forgot-email" required placeholder=" ">
+          <label for="forgot-email">Email Address</label>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeForgotPasswordModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Send Reset Link</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Custom Javascript -->
+  <script src="app.js"></script>
+</body>
+
+</html>
